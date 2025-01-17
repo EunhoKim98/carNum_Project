@@ -38,6 +38,7 @@ dependencies:
   form_field_validator: ^1.1.0
   flutter_svg: ^2.0.17
   flutter_launcher_icons: ^0.14.2
+  cupertino_setting_control: ^1.1.0
 
 
 dev_dependencies:
