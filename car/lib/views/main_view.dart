@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:car/views/car_search_screen.dart';
 import 'package:car/views/setting_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:cupertino_setting_control/cupertino_setting_control.dart';
 
 class MainPage extends StatefulWidget {
    const MainPage({super.key});
@@ -13,11 +13,18 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
    int _currentIndex = 0;
+   final PageController _pageController = PageController();
 
    final List<Widget> _screens = [
       CarSearchScreen(),
       SettingScreen(),
    ];
+
+   @override
+   void dispose() {
+      _pageController.dispose(); // PageController를 dispose합니다.
+      super.dispose();
+   }
 
    @override
    Widget build(BuildContext context) {
@@ -33,46 +40,38 @@ class _MainPageState extends State<MainPage> {
          );
       }
 
-
       return SafeArea(
          child: Scaffold(
-            appBar: AppBar(
-               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-               leading: const SizedBox(),
-               leadingWidth: 0,
-               centerTitle: false,
-                title: SvgPicture.asset(
-                   "assets/images/logo_1024.svg",
-                   colorFilter: ColorFilter.mode(
-                       Theme.of(context).iconTheme.color!, BlendMode.srcIn),
-                   height: 20,
-                   width: 300,
-                ),
-               actions: [
-
-               ],
+            body: PageView(
+               controller: _pageController,
+               onPageChanged: (index) {
+                  setState(() {
+                     _currentIndex = index;
+                  });
+               },
+               children: _screens,
             ),
-
-
-            body:
-            _screens[_currentIndex],
             bottomNavigationBar: BottomNavigationBar(
                currentIndex: _currentIndex,
                onTap: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
+                  _pageController.jumpToPage(index); // 페이지 전환
                },
                items: [
                   BottomNavigationBarItem(
-                     icon: Icon(Icons.car_crash),
+                     icon: Icon(
+                        Icons.car_crash,
+                        color: Colors.white,
+                     ),
                      label: "침수차검색",
                   ),
                   BottomNavigationBarItem(
                      icon: Icon(Icons.settings),
-                     label: "설정"
+                     label: "설정",
                   ),
                ],
+               backgroundColor: Color.fromARGB(255, 54, 52, 163),
+               selectedItemColor: Colors.white, // 선택된 아이콘 및 텍스트 색상
+               unselectedItemColor: Colors.white70, // 선택되지 않은 아이콘 및 텍스트 색상
             ),
          ),
       );
