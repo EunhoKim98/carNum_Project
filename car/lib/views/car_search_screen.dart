@@ -17,9 +17,8 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
   CarModel? _carModel;
 
   Future<CarModel?> searchCar(String carNum) async {
-    // String url = 'http://127.0.0.1:5000/api/cars?carNum=
-    String url = 'http://54.180.109.207:500'
-        '0/api/cars?carNum=$carNum';
+    String url = 'http://127.0.0.1:5000/api/cars?carNum=$carNum';
+    // String url = 'http://54.180.109.207:5000/api/cars?carNum=$carNum';
 
     try {
       var response = await http.get(Uri.parse(url));
@@ -43,7 +42,13 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('차량 검색'),
+        title: Text(
+          '차량 검색',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 54, 52, 163),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -62,9 +67,6 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
                   }
                   return null;
                 },
-                onChanged: (value) {
-                  // 차량 번호가 변경될 때 수행할 작업 (필요시)
-                },
               ),
               Padding(
                 padding: EdgeInsets.all(7.0),
@@ -78,24 +80,75 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
                       setState(() {
                         _carModel = car;
                       });
-
-                      if (_carModel != null) {
-                        print('차량 정보: ${_carModel!.acdnKindNm}');
-                      } else {
-                        print('차량을 찾을 수 없습니다.');
-                        // 화면상에 띄어줘야함
-                      }
                     });
                   }
                 },
                 child: Text('검색'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color.fromARGB(255, 54, 52, 163), // 배경색 설정
+                ),
               ),
-              if (_carModel != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 20.0),
-                  child: SearchResult(),
-                    // Text 말고 다른걸로 띄어주고 싶음
-                  ),
+              SizedBox(height: 30),
+              // 차량 정보를 표로 보여주는 부분
+              if (_carModel != null) ...[
+                DataTable(
+                  columns: [
+                    DataColumn(
+                      label: Container(
+                        child: Text(
+                          '사고수준',
+                          textAlign: TextAlign.center, // 가운데 정렬
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Text(
+                          '사고날짜',
+                          textAlign: TextAlign.center, // 가운데 정렬
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Text(
+                          '차량번호',
+                          textAlign: TextAlign.center, // 가운데 정렬
+                        ),
+                      ),
+                    ),
+                  ],
+                  rows: [
+                    DataRow(cells: [
+                      DataCell(
+                        Container(
+                          alignment: Alignment.center, // 가운데 정렬
+                          child: Text(_carModel!.acdnKindNm),
+                        ),
+                      ),
+                      DataCell(
+                        Container(
+                          alignment: Alignment.center, // 가운데 정렬
+                          child: Text(_carModel!.acdnOccrDtm),
+                        ),
+                      ),
+                      DataCell(
+                        Container(
+                          alignment: Alignment.center, // 가운데 정렬
+                          child: Text(_carModel!.nowVhclNo),
+                        ),
+                      ),
+                    ]),
+                  ],
+                ),
+                // 추가적인 아이콘 또는 메시지 표시
+                Container(padding: EdgeInsets.all(16),),
+                Icon(Icons.car_crash, color: Color.fromARGB(255, 0, 122, 255), size: 150,),
+                Text("침 수 차 량", style: TextStyle(color: Color.fromARGB(255, 0, 122, 255), fontSize: 20),),
+              ] else if (_carModel == null && _carNum != null) ...[
+                Icon(Icons.gpp_good, color: Color.fromARGB(255, 0, 122, 255), size: 150,),
+                Text("침수 이력이 없습니다.", style: TextStyle(color: Color.fromARGB(255, 0, 122, 255), fontSize: 20),),
+              ],
             ],
           ),
         ),
@@ -138,6 +191,11 @@ class SearchForm extends StatelessWidget {
       decoration: InputDecoration(
         labelText: '차량 번호 입력',
         border: OutlineInputBorder(),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Color.fromARGB(255, 54, 52, 163), // 포커스 시 색상
+          ),
+        ),
       ),
     );
   }
