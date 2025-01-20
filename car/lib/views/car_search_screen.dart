@@ -3,6 +3,7 @@ import 'package:car/models/car_model.dart';
 import 'package:car/views/search_result.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CarSearchScreen extends StatefulWidget {
   const CarSearchScreen({super.key});
@@ -18,7 +19,6 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
 
   Future<CarModel?> searchCar(String carNum) async {
     String url = 'http://127.0.0.1:5000/api/cars?carNum=$carNum';
-    // String url = 'http://54.180.109.207:5000/api/cars?carNum=$carNum';
 
     try {
       var response = await http.get(Uri.parse(url));
@@ -36,6 +36,23 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
       print('API ERROR: $e');
       return null;
     }
+  }
+
+  // 검색 이력 저장
+  Future<void> _saveSearchHistory(String carNum, String acdnKindNm) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // 기존 이력 로드
+    List<String> carNumbers = prefs.getStringList('carNumbers') ?? [];
+    List<String> acdnKindNms = prefs.getStringList('acdnKindNms') ?? [];
+
+    // 새로운 이력 추가 (가장 앞에 추가)
+    carNumbers.insert(0, carNum);
+    acdnKindNms.insert(0, acdnKindNm);
+
+    // 저장
+    await prefs.setStringList('carNumbers', carNumbers);
+    await prefs.setStringList('acdnKindNms', acdnKindNms);
   }
 
   @override
@@ -80,6 +97,9 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
                       setState(() {
                         _carModel = car;
                       });
+                      if (_carModel != null) {
+                        _saveSearchHistory(_carNum!, _carModel!.acdnKindNm);
+                      }
                     });
                   }
                 },
@@ -88,65 +108,12 @@ class _CarSearchScreenState extends State<CarSearchScreen> {
                   backgroundColor: Color.fromARGB(255, 54, 52, 163), // 배경색 설정
                 ),
               ),
-              SizedBox(height: 30),
               // 차량 정보를 표로 보여주는 부분
               if (_carModel != null) ...[
-                DataTable(
-                  columns: [
-                    DataColumn(
-                      label: Container(
-                        child: Text(
-                          '사고수준',
-                          textAlign: TextAlign.center, // 가운데 정렬
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Container(
-                        child: Text(
-                          '사고날짜',
-                          textAlign: TextAlign.center, // 가운데 정렬
-                        ),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Container(
-                        child: Text(
-                          '차량번호',
-                          textAlign: TextAlign.center, // 가운데 정렬
-                        ),
-                      ),
-                    ),
-                  ],
-                  rows: [
-                    DataRow(cells: [
-                      DataCell(
-                        Container(
-                          alignment: Alignment.center, // 가운데 정렬
-                          child: Text(_carModel!.acdnKindNm),
-                        ),
-                      ),
-                      DataCell(
-                        Container(
-                          alignment: Alignment.center, // 가운데 정렬
-                          child: Text(_carModel!.acdnOccrDtm),
-                        ),
-                      ),
-                      DataCell(
-                        Container(
-                          alignment: Alignment.center, // 가운데 정렬
-                          child: Text(_carModel!.nowVhclNo),
-                        ),
-                      ),
-                    ]),
-                  ],
-                ),
-                // 추가적인 아이콘 또는 메시지 표시
-                Container(padding: EdgeInsets.all(16),),
-                Icon(Icons.car_crash, color: Color.fromARGB(255, 0, 122, 255), size: 150,),
-                Text("침 수 차 량", style: TextStyle(color: Color.fromARGB(255, 0, 122, 255), fontSize: 20),),
+                SizedBox(height: 15),
+                SearchResult(carModel: _carModel!, carNum: _carNum!),
               ] else if (_carModel == null && _carNum != null) ...[
-                Icon(Icons.gpp_good, color: Color.fromARGB(255, 0, 122, 255), size: 150,),
+                Icon(Icons.gpp_good, color: Color.fromARGB(255, 0, 122, 255), size: 100,),
                 Text("침수 이력이 없습니다.", style: TextStyle(color: Color.fromARGB(255, 0, 122, 255), fontSize: 20),),
               ],
             ],
@@ -164,7 +131,7 @@ class SearchForm extends StatelessWidget {
     this.isEnabled = true,
     this.onSaved,
     this.validator,
-    this.onChanged, // 여기에 추가
+    this.onChanged,
     this.onFieldSubmitted,
     this.focusNode,
     this.autofocus = false,
@@ -174,7 +141,7 @@ class SearchForm extends StatelessWidget {
   final bool isEnabled;
   final ValueChanged<String?>? onSaved;
   final FormFieldValidator<String>? validator;
-  final ValueChanged<String>? onChanged; // 여기에 추가
+  final ValueChanged<String>? onChanged;
   final onFieldSubmitted;
   final FocusNode? focusNode;
   final bool autofocus;
@@ -185,7 +152,7 @@ class SearchForm extends StatelessWidget {
       enabled: isEnabled,
       onSaved: onSaved,
       validator: validator,
-      onChanged: onChanged, // 여기에 추가
+      onChanged: onChanged,
       focusNode: focusNode,
       autofocus: autofocus,
       decoration: InputDecoration(
