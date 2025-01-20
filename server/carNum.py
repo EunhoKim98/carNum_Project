@@ -12,7 +12,7 @@ CORS(app)  # 모든 출처에서의 요청을 허용
 URL = "http://apis.data.go.kr/1160100/service/GetASLundService/getAutomobileLundinfo"
 
 config = configparser.ConfigParser()
-config.read('./server/config.ini')
+config.read('./config.ini')
 
 API_KEY = config['DEFAULT']['API_KEY']  # API 키 가져오기
 
@@ -34,9 +34,13 @@ def search_car(carNum):
 
 def parse_result(result):
     items = result['response']['body']['items']
-    
     data = items['item']
     
+    if data:
+        acdnOccrDtm = data[0]['acdnOccrDtm'].split(' ')
+    
+        data[0]['acdnOccrDtm'] = acdnOccrDtm[0]
+        
     return data
     
 @app.route('/api/cars', methods=['GET'])
@@ -48,8 +52,7 @@ def get_car_info():
         data = parse_result(result)
         pprint(data)
         if data == []:
-            return jsonify({"error": "Not Found Car Number"}), 400
-        
+            return jsonify({"nowVhclNo": car_num, "acdnKindNm": "정상"}), 200
         else:
             return jsonify(data[0]), 200
     else:
