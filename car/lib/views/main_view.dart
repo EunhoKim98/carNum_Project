@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:car/views/car_search_screen.dart';
-import 'package:car/views/setting_screen.dart';
+import 'package:car/views/search_history.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:cupertino_setting_control/cupertino_setting_control.dart';
 
 class MainPage extends StatefulWidget {
    const MainPage({super.key});
@@ -17,7 +16,7 @@ class _MainPageState extends State<MainPage> {
 
    final List<Widget> _screens = [
       CarSearchScreen(),
-      SettingScreen(),
+      SearchHistory(),
    ];
 
    @override
@@ -66,7 +65,7 @@ class _MainPageState extends State<MainPage> {
                   ),
                   BottomNavigationBarItem(
                      icon: Icon(Icons.settings),
-                     label: "설정",
+                     label: "검색이력",
                   ),
                ],
                backgroundColor: Color.fromARGB(255, 54, 52, 163),
